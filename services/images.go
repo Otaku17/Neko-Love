@@ -40,30 +40,30 @@ func ProcessGIF(filterName string, g *gif.GIF) (*gif.GIF, error) {
 	}
 
 	for i, frame := range g.Image {
-    bounds := g.Image[0].Bounds()
-    rgba := image.NewRGBA(bounds)
+		bounds := g.Image[0].Bounds()
+		rgba := image.NewRGBA(bounds)
 
-    draw.Draw(rgba, frame.Bounds(), frame, frame.Bounds().Min, draw.Over)
+		draw.Draw(rgba, frame.Bounds(), frame, frame.Bounds().Min, draw.Over)
 
-    filtered := ApplyFilter(filterName, rgba)
+		filtered := ApplyFilter(filterName, rgba)
 
-    palettedFrame := rgbaToPalettedWithTransparency(filtered)
+		palettedFrame := rgbaToPalettedWithTransparency(filtered)
 
-    palettedFrame.Rect = bounds
+		palettedFrame.Rect = bounds
 
-    result.Image = append(result.Image, palettedFrame)
+		result.Image = append(result.Image, palettedFrame)
 
-    if i < len(g.Delay) {
-        result.Delay = append(result.Delay, g.Delay[i])
-    } else {
-        result.Delay = append(result.Delay, 0)
-    }
-    if i < len(g.Disposal) {
-        result.Disposal = append(result.Disposal, g.Disposal[i])
-    } else {
-        result.Disposal = append(result.Disposal, gif.DisposalNone)
-    }
-	}	
+		if i < len(g.Delay) {
+			result.Delay = append(result.Delay, g.Delay[i])
+		} else {
+			result.Delay = append(result.Delay, 0)
+		}
+		if i < len(g.Disposal) {
+			result.Disposal = append(result.Disposal, g.Disposal[i])
+		} else {
+			result.Disposal = append(result.Disposal, gif.DisposalNone)
+		}
+	}
 
 	return result, nil
 }
@@ -83,42 +83,44 @@ func ApplyFilter(filter string, img image.Image) image.Image {
 	draw.Draw(rgba, rgba.Bounds(), img, img.Bounds().Min, draw.Src)
 
 	switch filter {
-		case "blurple":
-			return filters.Blurple(rgba)
-		case "fuchsia":
-			return filters.Fuchsia(rgba)
-		case "glitch":
-			return filters.Glitch(rgba)
-		case "poppink":
-			return filters.PopPink(rgba)
-		case "deepfry":
-			return filters.Deepfry(rgba)
-		case "posterize":
-			return filters.Posterize(rgba)
-		case "pixelate":
-			return filters.Pixelate(rgba)
-		case "vaporwave":
-			return filters.Vaporwave(rgba)
-		case "anime_outline":
-			return filters.AnimeOutline(rgba)
-		case "crimson":
-			return filters.Crimson(rgba)
-		case "amber":
-			return filters.Amber(rgba)
-		case "mint":
-			return filters.Mint(rgba)
-		case "aqua":
-			return filters.Aqua(rgba)
-		case "sunset":
-			return filters.Sunset(rgba)
-		case "bubblegum":
-			return filters.Bubblegum(rgba)
-		case "negative":
-			return filters.Negative(rgba)
-		case "greyscale":
-			return filters.Greyscale(rgba)
-		default:
-			return rgba
+	case "blurple":
+		return filters.Blurple(rgba)
+	case "fuchsia":
+		return filters.Fuchsia(rgba)
+	case "glitch":
+		return filters.Glitch(rgba)
+	case "poppink":
+		return filters.PopPink(rgba)
+	case "deepfry":
+		return filters.Deepfry(rgba)
+	case "posterize":
+		return filters.Posterize(rgba)
+	case "pixelate":
+		return filters.Pixelate(rgba)
+	case "vaporwave":
+		return filters.Vaporwave(rgba)
+	case "anime_outline":
+		return filters.AnimeOutline(rgba)
+	case "crimson":
+		return filters.Crimson(rgba)
+	case "amber":
+		return filters.Amber(rgba)
+	case "mint":
+		return filters.Mint(rgba)
+	case "aqua":
+		return filters.Aqua(rgba)
+	case "sunset":
+		return filters.Sunset(rgba)
+	case "bubblegum":
+		return filters.Bubblegum(rgba)
+	case "negative":
+		return filters.Negative(rgba)
+	case "greyscale":
+		return filters.Greyscale(rgba)
+	case "holographic":
+		return filters.HoloFuturistic(rgba)
+	default:
+		return rgba
 	}
 }
 
