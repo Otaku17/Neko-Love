@@ -3,313 +3,651 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Neko-Love | Anime Image API</title>
-  <meta name="description" content="Neko-Love is back with a cleaner anime image API, filter endpoints, and modern documentation ready for GitHub Pages.">
+  <title>Neko-Love | Anime API Reboot</title>
+  <meta name="description" content="Neko-Love is back with a sharper anime image API, interactive docs, and a static landing page ready for GitHub Pages.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Syne:wght@500;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #f7efe4;
-      --bg-deep: #ead9c0;
-      --paper: rgba(255, 251, 246, 0.92);
-      --paper-strong: rgba(255, 249, 241, 0.98);
-      --ink: #1e1814;
-      --muted: #6d665f;
-      --line: rgba(31, 23, 15, 0.12);
-      --accent: #df6d3e;
-      --accent-deep: #b64a20;
-      --teal: #1f5958;
-      --shadow: 0 24px 62px rgba(62, 46, 27, 0.15);
-      --shadow-soft: 0 14px 36px rgba(62, 46, 27, 0.09);
-      --sans: "Space Grotesk", "Segoe UI", sans-serif;
+      --bg: #f7f0e6;
+      --paper: rgba(255, 250, 243, 0.86);
+      --paper-strong: rgba(255, 252, 247, 0.96);
+      --ink: #181312;
+      --muted: #6c635c;
+      --line: rgba(31, 22, 17, 0.1);
+      --accent: #f1632a;
+      --accent-deep: #bd3d11;
+      --accent-soft: rgba(241, 99, 42, 0.14);
+      --mint: #1e7a73;
+      --mint-soft: rgba(30, 122, 115, 0.12);
+      --gold: #f4bf5b;
+      --shadow: 0 28px 80px rgba(62, 43, 28, 0.14);
+      --shadow-soft: 0 16px 36px rgba(62, 43, 28, 0.08);
+      --headline: "Syne", "Segoe UI", sans-serif;
+      --body: "Manrope", "Segoe UI", sans-serif;
       --mono: "IBM Plex Mono", Consolas, monospace;
     }
     * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body {
       margin: 0;
       color: var(--ink);
-      font-family: var(--sans);
+      font-family: var(--body);
       background:
-        radial-gradient(circle at top left, rgba(223,109,62,0.22), transparent 24%),
-        radial-gradient(circle at 92% 8%, rgba(31,89,88,0.18), transparent 20%),
-        linear-gradient(180deg, var(--bg) 0%, var(--bg-deep) 100%);
+        radial-gradient(circle at 12% 12%, rgba(241,99,42,0.22), transparent 24%),
+        radial-gradient(circle at 88% 18%, rgba(30,122,115,0.15), transparent 18%),
+        radial-gradient(circle at 50% 82%, rgba(244,191,91,0.18), transparent 24%),
+        linear-gradient(180deg, #f8f1e6 0%, #f1e2cf 100%);
+      min-height: 100vh;
     }
-    a { color: inherit; }
+    a { color: inherit; text-decoration: none; }
     .shell {
-      max-width: 1320px;
+      width: min(1320px, calc(100% - 32px));
       margin: 0 auto;
-      padding: 26px 18px 56px;
+      padding: 22px 0 56px;
+    }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+      padding: 14px 18px;
+      border: 1px solid rgba(255,255,255,0.45);
+      border-radius: 999px;
+      background: rgba(255, 250, 243, 0.58);
+      backdrop-filter: blur(14px);
+      box-shadow: var(--shadow-soft);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+    }
+    .brand-mark {
+      display: inline-grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 14px;
+      background:
+        linear-gradient(135deg, rgba(241,99,42,0.18), rgba(30,122,115,0.18)),
+        #fff8ef;
+      border: 1px solid rgba(31,22,17,0.1);
+      font-family: var(--headline);
+      font-size: 0.96rem;
+    }
+    .nav {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .nav a {
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-size: 0.94rem;
+      color: var(--muted);
+      transition: background 150ms ease, color 150ms ease, transform 150ms ease;
+    }
+    .nav a:hover {
+      background: rgba(255,255,255,0.72);
+      color: var(--ink);
+      transform: translateY(-1px);
     }
     .hero {
-      overflow: hidden;
       position: relative;
-      border-radius: 34px;
-      border: 1px solid var(--line);
-      background: linear-gradient(145deg, rgba(255,251,246,0.98), rgba(247,237,223,0.92));
+      overflow: hidden;
+      padding: clamp(28px, 4vw, 42px);
+      border-radius: 38px;
+      background:
+        linear-gradient(140deg, rgba(255,252,247,0.98), rgba(246,235,219,0.94));
+      border: 1px solid rgba(255,255,255,0.52);
       box-shadow: var(--shadow);
-      padding: 34px;
+      isolation: isolate;
     }
+    .hero::before,
     .hero::after {
       content: "";
       position: absolute;
-      right: -40px;
-      bottom: -80px;
+      border-radius: 999px;
+      pointer-events: none;
+      z-index: -1;
+      filter: blur(10px);
+    }
+    .hero::before {
       width: 280px;
       height: 280px;
-      border-radius: 50%;
-      background:
-        radial-gradient(circle at 30% 30%, rgba(223,109,62,0.22), transparent 48%),
-        radial-gradient(circle at 70% 70%, rgba(31,89,88,0.2), transparent 42%);
-      pointer-events: none;
+      right: -80px;
+      top: -40px;
+      background: radial-gradient(circle, rgba(241,99,42,0.22), transparent 60%);
+    }
+    .hero::after {
+      width: 320px;
+      height: 320px;
+      left: -120px;
+      bottom: -120px;
+      background: radial-gradient(circle, rgba(30,122,115,0.16), transparent 62%);
+    }
+    .hero-grid {
+      display: grid;
+      gap: 24px;
+      align-items: start;
+    }
+    @media (min-width: 1060px) {
+      .hero-grid {
+        grid-template-columns: minmax(0, 1fr) minmax(380px, 0.9fr);
+      }
     }
     .eyebrow {
-      margin: 0 0 10px;
-      color: var(--teal);
-      text-transform: uppercase;
-      letter-spacing: 0.18em;
-      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.7);
+      border: 1px solid var(--line);
+      font-size: 0.76rem;
       font-weight: 800;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--mint);
+    }
+    .eyebrow::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--gold));
+      box-shadow: 0 0 0 6px rgba(241,99,42,0.08);
     }
     h1 {
       margin: 0;
-      font-size: clamp(3rem, 8vw, 6.2rem);
-      line-height: 0.88;
+      font-family: var(--headline);
+      font-size: clamp(3.2rem, 8vw, 6.8rem);
+      line-height: 0.9;
       letter-spacing: -0.08em;
       max-width: 8ch;
     }
     .lead {
       margin: 18px 0 0;
-      max-width: 62ch;
+      max-width: 58ch;
       color: var(--muted);
       font-size: 1.08rem;
-      line-height: 1.7;
+      line-height: 1.75;
     }
-    .actions {
+    .cta-row {
       display: flex;
       gap: 12px;
       flex-wrap: wrap;
-      margin-top: 24px;
+      margin-top: 26px;
     }
     .button {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-height: 48px;
+      min-height: 50px;
       padding: 0 18px;
       border-radius: 999px;
-      text-decoration: none;
-      font-weight: 700;
       border: 1px solid transparent;
-      transition: transform 140ms ease, box-shadow 140ms ease;
+      font-weight: 800;
+      transition: transform 150ms ease, box-shadow 150ms ease, background 150ms ease;
     }
     .button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 10px 24px rgba(72, 50, 30, 0.14);
+      transform: translateY(-2px);
+      box-shadow: 0 14px 26px rgba(72, 48, 27, 0.12);
     }
     .button.primary {
       color: #fff;
       background: linear-gradient(135deg, var(--accent), var(--accent-deep));
     }
-    .button.secondary {
+    .button.ghost {
+      background: rgba(255,255,255,0.76);
       border-color: var(--line);
-      background: rgba(255,255,255,0.7);
     }
-    .hero-grid,
-    .cards,
-    .examples {
+    .stat-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 28px;
+    }
+    .pill {
+      padding: 12px 14px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.72);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-soft);
+      min-width: 160px;
+    }
+    .pill strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 1.02rem;
+    }
+    .pill span {
+      color: var(--muted);
+      font-size: 0.91rem;
+    }
+    .hero-card {
+      position: relative;
+      padding: 18px;
+      border-radius: 30px;
+      background: linear-gradient(180deg, rgba(29,25,24,0.96), rgba(34,29,28,0.92));
+      color: #fff8ef;
+      box-shadow: 0 24px 44px rgba(31,22,17,0.22);
+      min-height: 520px;
+    }
+    .window-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      color: rgba(255,248,239,0.72);
+      font-size: 0.82rem;
+    }
+    .window-dots {
+      display: flex;
+      gap: 8px;
+    }
+    .window-dots span {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: block;
+      background: rgba(255,255,255,0.25);
+    }
+    .window-dots span:nth-child(1) { background: #ff7d65; }
+    .window-dots span:nth-child(2) { background: #f6c85a; }
+    .window-dots span:nth-child(3) { background: #5fd3b2; }
+    .browser-panel {
+      overflow: hidden;
+      border-radius: 24px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.04);
+    }
+    .browser-row {
+      display: grid;
+      grid-template-columns: 92px 1fr;
+      min-height: 320px;
+    }
+    .side-nav {
+      padding: 18px 12px;
+      background: rgba(255,255,255,0.04);
+      border-right: 1px solid rgba(255,255,255,0.08);
+    }
+    .side-nav div {
+      margin-bottom: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      font-size: 0.78rem;
+      color: rgba(255,248,239,0.76);
+      background: rgba(255,255,255,0.04);
+    }
+    .side-nav div.active {
+      color: #fff;
+      background: linear-gradient(135deg, rgba(241,99,42,0.22), rgba(244,191,91,0.18));
+    }
+    .preview {
+      padding: 18px;
+      background:
+        radial-gradient(circle at 18% 20%, rgba(241,99,42,0.16), transparent 20%),
+        radial-gradient(circle at 78% 72%, rgba(30,122,115,0.16), transparent 24%),
+        rgba(255,255,255,0.03);
+    }
+    .preview-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .preview-title strong {
+      display: block;
+      font-size: 1.02rem;
+    }
+    .preview-title span {
+      font-size: 0.82rem;
+      color: rgba(255,248,239,0.65);
+    }
+    .chip {
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      background: rgba(255,255,255,0.08);
+      color: rgba(255,248,239,0.86);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .preview-body {
+      display: grid;
+      gap: 14px;
+    }
+    .screen-card {
+      padding: 16px;
+      border-radius: 22px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .screen-card h3 {
+      margin: 0 0 8px;
+      font-size: 0.92rem;
+      color: rgba(255,248,239,0.9);
+    }
+    .screen-card p {
+      margin: 0;
+      color: rgba(255,248,239,0.64);
+      line-height: 1.6;
+      font-size: 0.9rem;
+    }
+    .code-box {
+      margin-top: 16px;
+      padding: 16px;
+      border-radius: 18px;
+      background: #111010;
+      border: 1px solid rgba(255,255,255,0.08);
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      line-height: 1.65;
+      overflow: auto;
+    }
+    .code-box .comment { color: #8b837d; }
+    .code-box .key { color: #7fd4c5; }
+    .code-box .url { color: #ffd38f; }
+    .section {
+      margin-top: 22px;
+      padding: 26px;
+      border-radius: 34px;
+      background: var(--paper-strong);
+      border: 1px solid rgba(255,255,255,0.5);
+      box-shadow: var(--shadow);
+    }
+    .section-header {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 22px;
+      flex-wrap: wrap;
+    }
+    .section-kicker {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--mint);
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 0.75rem;
+      font-weight: 800;
+    }
+    .section h2 {
+      margin: 0;
+      font-family: var(--headline);
+      font-size: clamp(2rem, 4vw, 3.4rem);
+      letter-spacing: -0.05em;
+      line-height: 0.95;
+    }
+    .section-copy {
+      max-width: 50ch;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+    .feature-grid,
+    .usage-grid {
       display: grid;
       gap: 18px;
     }
-    .hero-grid {
-      margin-top: 28px;
-    }
-    @media (min-width: 1024px) {
-      .hero-grid {
-        grid-template-columns: minmax(0, 1.2fr) minmax(340px, 0.8fr);
+    @media (min-width: 960px) {
+      .feature-grid {
+        grid-template-columns: 1.2fr 0.8fr 0.8fr;
       }
-      .cards {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-      }
-      .examples {
+      .usage-grid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
       }
     }
-    .panel,
-    .card {
+    .feature-card,
+    .usage-card {
+      padding: 20px;
       border-radius: 26px;
       border: 1px solid var(--line);
-      background: var(--paper);
+      background: rgba(255,255,255,0.72);
       box-shadow: var(--shadow-soft);
     }
-    .panel {
-      padding: 20px;
+    .feature-card.accent {
+      background:
+        radial-gradient(circle at top right, rgba(241,99,42,0.16), transparent 28%),
+        linear-gradient(180deg, rgba(255,255,255,0.88), rgba(250,242,232,0.92));
     }
-    .panel h2,
-    .card h3,
-    .section h2 {
+    .feature-card h3,
+    .usage-card h3 {
       margin: 0 0 10px;
+      font-size: 1.22rem;
     }
-    .panel p,
-    .card p,
-    .section p {
+    .feature-card p,
+    .usage-card p {
       margin: 0;
       color: var(--muted);
-      line-height: 1.65;
+      line-height: 1.7;
     }
-    .stats {
-      display: grid;
-      gap: 14px;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+    .mini-metrics {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
       margin-top: 18px;
     }
-    .stat {
-      padding: 14px;
-      border-radius: 18px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,0.72);
+    .mini-metrics span {
+      padding: 10px 12px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      background: var(--accent-soft);
+      color: #7a300f;
     }
-    .stat strong {
-      display: block;
-      margin-bottom: 6px;
-      font-size: 1.35rem;
-    }
-    .section {
-      margin-top: 22px;
-      padding: 24px;
-      border-radius: 30px;
-      border: 1px solid var(--line);
-      background: var(--paper-strong);
-      box-shadow: var(--shadow);
-    }
-    .cards .card,
-    .examples .card {
-      padding: 20px;
-    }
-    .kicker {
-      color: var(--teal);
-      text-transform: uppercase;
-      letter-spacing: 0.16em;
-      font-size: 12px;
-      font-weight: 800;
-      margin-bottom: 10px;
-    }
-    pre {
-      margin: 0;
-      overflow: auto;
-      border-radius: 18px;
+    .usage-card pre {
+      margin: 14px 0 0;
       padding: 16px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,0.74);
-      color: #1f2933;
+      border-radius: 18px;
+      background: rgba(24,19,18,0.96);
+      color: #fff7eb;
+      border: 1px solid rgba(24,19,18,0.08);
       font-family: var(--mono);
-      font-size: 0.84rem;
-      line-height: 1.55;
+      font-size: 0.82rem;
+      line-height: 1.62;
+      overflow: auto;
     }
-    .callout {
+    .footer-note {
       margin-top: 18px;
-      padding: 16px 18px;
-      border-radius: 20px;
-      border: 1px solid rgba(31,89,88,0.14);
-      background: rgba(31,89,88,0.08);
-      color: #24403f;
+      padding: 18px;
+      border-radius: 22px;
+      background: linear-gradient(135deg, rgba(30,122,115,0.08), rgba(244,191,91,0.16));
+      border: 1px solid rgba(30,122,115,0.12);
+      color: #2d403f;
+      line-height: 1.7;
+    }
+    @media (max-width: 760px) {
+      .shell {
+        width: min(100% - 20px, 1320px);
+      }
+      .topbar {
+        border-radius: 24px;
+        align-items: start;
+        flex-direction: column;
+      }
+      .browser-row {
+        grid-template-columns: 1fr;
+      }
+      .side-nav {
+        display: flex;
+        gap: 10px;
+        overflow: auto;
+        border-right: 0;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+      }
+      .side-nav div {
+        white-space: nowrap;
+        margin-bottom: 0;
+      }
+      .hero-card {
+        min-height: auto;
+      }
     }
   </style>
 </head>
 <body>
   <div class="shell">
-    <section class="hero">
-      <p class="eyebrow">Neko-Love Is Back</p>
-      <h1>Anime API, now with a real front page.</h1>
-      <p class="lead">Serve random anime images, direct asset URLs, and filter endpoints from Go, while publishing a proper landing page and interactive docs from GitHub Pages.</p>
+    <header class="topbar">
+      <a class="brand" href="./">
+        <span class="brand-mark">NL</span>
+        <span>Neko-Love</span>
+      </a>
+      <nav class="nav">
+        <a href="#product">Product</a>
+        <a href="#examples">Examples</a>
+        <a href="./docs/">Docs</a>
+        <a href="./openapi.json">OpenAPI</a>
+      </nav>
+    </header>
 
-      <div class="actions">
-        <a class="button primary" href="./docs/">Open API Docs</a>
-        <a class="button secondary" href="./docs/redoc.html">Open Redoc View</a>
-        <a class="button secondary" href="./openapi.json">View OpenAPI JSON</a>
-      </div>
-
+    <section class="hero" id="top">
       <div class="hero-grid">
-        <div class="panel">
-          <h2>Built for a cleaner comeback</h2>
-          <p>Neko-Love now has a setup that feels ready to ship: local assets, filter routes, OpenAPI 3.1 docs, a static front page, and a documentation experience that looks closer to a real product than a raw developer tool.</p>
-          <div class="stats">
-            <div class="stat">
+        <div>
+          <div class="eyebrow">Return of the cat API</div>
+          <h1>The comeback should look dangerous.</h1>
+          <p class="lead">Neko-Love is back with a sharper public face: anime image endpoints, filter routes, interactive docs, and a static landing page that feels like a real product instead of a placeholder.</p>
+          <div class="cta-row">
+            <a class="button primary" href="./docs/">Open Docs</a>
+            <a class="button ghost" href="./docs/redoc.html">Redoc View</a>
+            <a class="button ghost" href="./openapi.json">OpenAPI JSON</a>
+          </div>
+          <div class="stat-row">
+            <div class="pill">
               <strong>OpenAPI 3.1</strong>
-              <span>Ready for docs tooling and SDK generation</span>
+              <span>Ready for wrappers and codegen</span>
             </div>
-            <div class="stat">
+            <div class="pill">
               <strong>18 filters</strong>
               <span>Including animated GIF support</span>
             </div>
-            <div class="stat">
-              <strong>Pages-ready</strong>
-              <span>Static site separated from the Go API</span>
+            <div class="pill">
+              <strong>Static-first</strong>
+              <span>GitHub Pages in front, Go API behind</span>
             </div>
           </div>
         </div>
-        <div class="panel">
-          <h2>Deployment split</h2>
-          <p>Host this static folder on GitHub Pages and keep the Go API on a VPS, Fly.io, Render, Railway, or your own server. That way you get a clean public site without trying to force dynamic Go code onto static hosting.</p>
-          <div class="callout">
-            Set <code>CORS_ALLOW_ORIGINS</code> on the API to your Pages domain if you want live “Try it out” requests from the static docs.
+
+        <aside class="hero-card" aria-label="Product preview">
+          <div class="window-top">
+            <div class="window-dots">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+            <div>api.neko-love.com</div>
           </div>
+
+          <div class="browser-panel">
+            <div class="browser-row">
+              <div class="side-nav">
+                <div class="active">Home</div>
+                <div>Docs</div>
+                <div>Filters</div>
+                <div>Status</div>
+              </div>
+              <div class="preview">
+                <div class="preview-header">
+                  <div class="preview-title">
+                    <strong>Neko-Love API v4</strong>
+                    <span>Metadata, direct image routes, remote filter rendering</span>
+                  </div>
+                  <span class="chip">Online</span>
+                </div>
+
+                <div class="preview-body">
+                  <div class="screen-card">
+                    <h3>Public endpoints that feel ready to use</h3>
+                    <p>Clean image metadata, direct asset delivery, and a filter pipeline that now has stricter validation, GIF handling, and docs that people can actually browse.</p>
+                  </div>
+                  <div class="screen-card">
+                    <h3>Pages + API split</h3>
+                    <p>Host the presentation layer on GitHub Pages and keep the Go runtime wherever you want. The result looks more polished and is easier to evolve.</p>
+                  </div>
+                </div>
+
+                <div class="code-box">
+                  <span class="comment">GET random image metadata</span><br>
+                  <span class="key">curl</span> <span class="url">"https://api.neko-love.com/api/v4/neko"</span><br><br>
+                  <span class="comment">GET filtered image</span><br>
+                  <span class="key">curl</span> <span class="url">"https://api.neko-love.com/api/v4/filters/pixelate?image=https://example.com/cat.png&amp;pixel_size=12"</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section" id="product">
+      <div class="section-header">
+        <div>
+          <span class="section-kicker">Why this feels better</span>
+          <h2>A front page with actual intent.</h2>
         </div>
+        <p class="section-copy">The previous version was technically clean but visually passive. This version adds contrast, hierarchy, product framing, and a stronger “we are back” energy without turning the page into noise.</p>
+      </div>
+
+      <div class="feature-grid">
+        <article class="feature-card accent">
+          <h3>Product-style docs</h3>
+          <p>Scalar gives you the interactive reference people expect, while Redoc stays available for a more classic handbook layout. Both are ready for public links.</p>
+          <div class="mini-metrics">
+            <span>Browser testing</span>
+            <span>Examples</span>
+            <span>Responses</span>
+          </div>
+        </article>
+        <article class="feature-card">
+          <h3>Cleaner split</h3>
+          <p>The landing page and docs live as static files for GitHub Pages. The Go API stays focused on assets, metadata, caching, and filters.</p>
+        </article>
+        <article class="feature-card">
+          <h3>Sharper positioning</h3>
+          <p>Instead of “here is a repo”, the site now reads more like “here is the API, here is the value, and here is where to start”.</p>
+        </article>
       </div>
     </section>
 
-    <section class="section">
-      <p class="kicker">Highlights</p>
-      <h2>What visitors will notice first</h2>
-      <div class="cards">
-        <article class="card">
-          <h3>Clean docs</h3>
-          <p>Scalar for the polished interactive reference, Redoc for the classic API handbook feel.</p>
+    <section class="section" id="examples">
+      <div class="section-header">
+        <div>
+          <span class="section-kicker">Quick start</span>
+          <h2>Easy to test in three moves.</h2>
+        </div>
+        <p class="section-copy">Keep the copy short, let the examples do the work, and point people into the docs before they get lost.</p>
+      </div>
+
+      <div class="usage-grid">
+        <article class="usage-card">
+          <h3>Metadata</h3>
+          <p>Pull a random asset for a category and get a stable JSON shape back.</p>
+          <pre><code>curl "https://api.neko-love.com/api/v4/neko"</code></pre>
         </article>
-        <article class="card">
-          <h3>Simple integration</h3>
-          <p>Metadata routes, direct image routes, and filter endpoints are easy to test from a browser or wrapper library.</p>
+        <article class="usage-card">
+          <h3>Direct image</h3>
+          <p>Open the returned path directly or embed it in a client app.</p>
+          <pre><code>GET /api/v4/images/neko/04.webp</code></pre>
         </article>
-        <article class="card">
-          <h3>Easy branding</h3>
-          <p>This site is just HTML, CSS, and JS, so you can push the identity harder without touching the Go runtime.</p>
+        <article class="usage-card">
+          <h3>Filter endpoint</h3>
+          <p>Test a filtered image with a remote public source and tune `pixel_size` when needed.</p>
+          <pre><code>curl "https://api.neko-love.com/api/v4/filters/pixelate?image=https://example.com/cat.png&pixel_size=12"</code></pre>
         </article>
       </div>
-    </section>
 
-    <section class="section">
-      <p class="kicker">Examples</p>
-      <h2>Quick usage snippets</h2>
-      <div class="examples">
-        <article class="card">
-          <h3>cURL</h3>
-          <pre><code>curl "https://api.neko-love.com/api/v4/neko"
-
-curl "https://api.neko-love.com/api/v4/filters/pixelate?image=https://example.com/cat.png&pixel_size=12"</code></pre>
-        </article>
-        <article class="card">
-          <h3>JavaScript</h3>
-          <pre><code>const meta = await fetch("https://api.neko-love.com/api/v4/neko")
-  .then((res) => res.json())
-
-const imgUrl = new URL("https://api.neko-love.com/api/v4/filters/pixelate")
-imgUrl.searchParams.set("image", "https://example.com/cat.png")
-imgUrl.searchParams.set("pixel_size", "12")</code></pre>
-        </article>
-        <article class="card">
-          <h3>Python</h3>
-          <pre><code>import requests
-
-meta = requests.get("https://api.neko-love.com/api/v4/neko").json()
-
-img = requests.get(
-    "https://api.neko-love.com/api/v4/filters/pixelate",
-    params={"image": "https://example.com/cat.png", "pixel_size": 12},
-)</code></pre>
-        </article>
+      <div class="footer-note">
+        If you want live “Try it out” from GitHub Pages, remember to allow your Pages domain with <code>CORS_ALLOW_ORIGINS</code> on the API side.
       </div>
     </section>
   </div>
 </body>
 </html>
-

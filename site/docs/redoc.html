@@ -3,108 +3,132 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Neko-Love API Docs | Redoc</title>
+  <title>Neko-Love Docs | Redoc</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Syne:wght@500;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #f6ede1;
-      --paper: rgba(255, 251, 246, 0.95);
-      --ink: #1d1916;
-      --muted: #6f665f;
-      --line: rgba(32, 22, 14, 0.12);
-      --accent: #de6d3f;
-      --teal: #1e5756;
-      --shadow: 0 22px 60px rgba(68, 47, 27, 0.15);
-      --sans: "Space Grotesk", "Segoe UI", sans-serif;
+      --bg: #f7f0e6;
+      --paper: rgba(255, 252, 247, 0.94);
+      --ink: #181312;
+      --muted: #6c635c;
+      --line: rgba(31,22,17,0.1);
+      --accent: #f1632a;
+      --accent-deep: #bd3d11;
+      --mint: #1e7a73;
+      --shadow: 0 24px 62px rgba(62,43,28,0.14);
+      --headline: "Syne", "Segoe UI", sans-serif;
+      --body: "Manrope", "Segoe UI", sans-serif;
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
       color: var(--ink);
-      font-family: var(--sans);
+      font-family: var(--body);
       background:
-        radial-gradient(circle at top left, rgba(222,109,63,0.18), transparent 24%),
-        linear-gradient(180deg, #f7efe3 0%, #ecddc8 100%);
+        radial-gradient(circle at 12% 12%, rgba(241,99,42,0.18), transparent 24%),
+        linear-gradient(180deg, #f8f1e6 0%, #f1e2cf 100%);
     }
+    a { color: inherit; text-decoration: none; }
     .shell {
-      max-width: 1420px;
+      width: min(1420px, calc(100% - 32px));
       margin: 0 auto;
-      padding: 24px 18px 48px;
+      padding: 22px 0 48px;
     }
     .hero {
       margin-bottom: 20px;
       padding: 28px;
-      border-radius: 30px;
-      border: 1px solid var(--line);
+      border-radius: 32px;
       background: var(--paper);
+      border: 1px solid rgba(255,255,255,0.48);
       box-shadow: var(--shadow);
     }
     .eyebrow {
-      margin: 0 0 8px;
-      color: var(--teal);
-      text-transform: uppercase;
-      letter-spacing: 0.16em;
-      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.72);
+      border: 1px solid var(--line);
+      color: var(--mint);
+      font-size: 0.76rem;
       font-weight: 800;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+    .eyebrow::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #f4bf5b);
     }
     h1 {
       margin: 0;
-      font-size: clamp(2.3rem, 6vw, 4.2rem);
-      line-height: 0.95;
-      letter-spacing: -0.05em;
+      font-family: var(--headline);
+      font-size: clamp(2.5rem, 6vw, 4.4rem);
+      line-height: 0.94;
+      letter-spacing: -0.06em;
+      max-width: 10ch;
     }
     .sub {
       margin-top: 14px;
-      max-width: 70ch;
+      max-width: 64ch;
       color: var(--muted);
-      line-height: 1.6;
+      line-height: 1.7;
     }
-    .links {
+    .actions {
       display: flex;
       gap: 12px;
       flex-wrap: wrap;
-      margin-top: 18px;
+      margin-top: 22px;
     }
-    .links a {
+    .button {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-height: 44px;
-      padding: 0 16px;
+      min-height: 48px;
+      padding: 0 18px;
       border-radius: 999px;
-      text-decoration: none;
-      font-weight: 700;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,0.78);
-      color: var(--ink);
+      font-weight: 800;
+      border: 1px solid transparent;
     }
-    .links a.primary {
+    .button.primary {
       color: #fff;
-      border-color: transparent;
-      background: linear-gradient(135deg, var(--accent), #b84b22);
+      background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+    }
+    .button.ghost {
+      background: rgba(255,255,255,0.74);
+      border-color: var(--line);
     }
     #redoc-wrap {
       overflow: hidden;
-      border-radius: 28px;
-      border: 1px solid var(--line);
+      border-radius: 30px;
+      border: 1px solid rgba(255,255,255,0.48);
       background: #fff;
       box-shadow: var(--shadow);
+    }
+    @media (max-width: 760px) {
+      .shell {
+        width: min(100% - 20px, 1420px);
+      }
     }
   </style>
 </head>
 <body>
   <div class="shell">
     <section class="hero">
-      <p class="eyebrow">Static API Docs</p>
-      <h1>Neko-Love with Redoc</h1>
-      <div class="sub">Use this version if you prefer a more classic API handbook layout for your static site.</div>
-      <div class="links">
-        <a class="primary" href="./">Scalar View</a>
-        <a href="./redoc.html">Redoc View</a>
-        <a href="../openapi.json">OpenAPI JSON</a>
-        <a href="../">Back to site</a>
+      <div class="eyebrow">Static docs</div>
+      <h1>Classic handbook view, cleaner shell.</h1>
+      <div class="sub">Keep Redoc around for people who prefer a more traditional API reference layout, while staying visually aligned with the landing page and Scalar version.</div>
+      <div class="actions">
+        <a class="button primary" href="./">Scalar</a>
+        <a class="button ghost" href="./redoc.html">Redoc</a>
+        <a class="button ghost" href="../openapi.json">OpenAPI JSON</a>
+        <a class="button ghost" href="../">Back to site</a>
       </div>
     </section>
 
@@ -116,4 +140,3 @@
   <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"></script>
 </body>
 </html>
-
