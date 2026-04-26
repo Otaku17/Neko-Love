@@ -16,10 +16,12 @@ import (
 // The output image preserves the original alpha channel.
 //
 // Parameters:
-//   img image.Image - The source image to be filtered.
+//
+//	img image.Image - The source image to be filtered.
 //
 // Returns:
-//   image.Image - A new image with the bubblegum filter applied.
+//
+//	image.Image - A new image with the bubblegum filter applied.
 func Bubblegum(img image.Image) image.Image {
 	bounds := img.Bounds()
 	dst := image.NewRGBA(bounds)
@@ -40,9 +42,9 @@ func Bubblegum(img image.Image) image.Image {
 			case lum >= 0.92:
 				nr, ng, nb = 255, 255, 255
 			case lum >= 0.7:
-				nr, ng, nb = 255,170,200
+				nr, ng, nb = 255, 170, 200
 			case lum >= 0.45:
-				nr, ng, nb = 160,60,100
+				nr, ng, nb = 160, 60, 100
 			case lum >= 0.15:
 				nr, ng, nb = 35, 39, 42
 			default:

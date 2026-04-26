@@ -2,7 +2,6 @@ package filters
 
 import (
 	"image"
-	"image/color"
 	_ "image/gif"
 	_ "image/jpeg"
 	_ "image/png"
@@ -15,22 +14,29 @@ import (
 // the resulting pixel to a shade of grey with the original alpha value preserved.
 //
 // Parameters:
-//   img image.Image - The source image to be converted to greyscale.
+//
+//	img image.Image - The source image to be converted to greyscale.
 //
 // Returns:
-//   image.Image - A new image in greyscale.
+//
+//	image.Image - A new image in greyscale.
 func Greyscale(img image.Image) image.Image {
-	bounds := img.Bounds()
+	src := ensureRGBA(img)
+	bounds := src.Bounds()
 	dst := image.NewRGBA(bounds)
 
 	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
+		srcOffset := src.PixOffset(bounds.Min.X, y)
+		dstOffset := dst.PixOffset(bounds.Min.X, y)
 		for x := bounds.Min.X; x < bounds.Max.X; x++ {
-			r, g, b, a := img.At(x, y).RGBA()
-			a8 := uint8(a >> 8)
+			lum := luminance8(src.Pix[srcOffset], src.Pix[srcOffset+1], src.Pix[srcOffset+2])
 
-			lum := uint8((0.299*float64(r>>8) + 0.587*float64(g>>8) + 0.114*float64(b>>8)))
-
-			dst.Set(x, y, color.NRGBA{R: lum, G: lum, B: lum, A: a8})
+			dst.Pix[dstOffset] = lum
+			dst.Pix[dstOffset+1] = lum
+			dst.Pix[dstOffset+2] = lum
+			dst.Pix[dstOffset+3] = src.Pix[srcOffset+3]
+			srcOffset += 4
+			dstOffset += 4
 		}
 	}
 

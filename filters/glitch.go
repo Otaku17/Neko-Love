@@ -2,7 +2,6 @@ package filters
 
 import (
 	"image"
-	"image/color"
 	_ "image/gif"
 	_ "image/jpeg"
 	_ "image/png"
@@ -16,12 +15,15 @@ import (
 // glitch-art appearance. The function returns a new image with the effect applied.
 //
 // Parameters:
-//   img image.Image - The source image to which the glitch effect will be applied.
+//
+//	img image.Image - The source image to which the glitch effect will be applied.
 //
 // Returns:
-//   image.Image - A new image with the glitch effect applied.
+//
+//	image.Image - A new image with the glitch effect applied.
 func Glitch(img image.Image) image.Image {
-	bounds := img.Bounds()
+	src := ensureRGBA(img)
+	bounds := src.Bounds()
 	dst := image.NewRGBA(bounds)
 
 	height := bounds.Dy()
@@ -36,16 +38,15 @@ func Glitch(img image.Image) image.Image {
 			gx := clamp(x+offsetG, bounds.Min.X, bounds.Max.X-1)
 			bx := clamp(x+offsetB, bounds.Min.X, bounds.Max.X-1)
 
-			r, _, _, _ := img.At(rx, y).RGBA()
-			_, g, _, _ := img.At(gx, y).RGBA()
-			_, _, b, a := img.At(bx, y).RGBA()
+			dstOffset := dst.PixOffset(x, y)
+			rOffset := src.PixOffset(rx, y)
+			gOffset := src.PixOffset(gx, y)
+			bOffset := src.PixOffset(bx, y)
 
-			dst.Set(x, y, color.NRGBA{
-				R: uint8(r >> 8),
-				G: uint8(g >> 8),
-				B: uint8(b >> 8),
-				A: uint8(a >> 8),
-			})
+			dst.Pix[dstOffset] = src.Pix[rOffset]
+			dst.Pix[dstOffset+1] = src.Pix[gOffset+1]
+			dst.Pix[dstOffset+2] = src.Pix[bOffset+2]
+			dst.Pix[dstOffset+3] = src.Pix[bOffset+3]
 		}
 	}
 
@@ -55,14 +56,12 @@ func Glitch(img image.Image) image.Image {
 		colorShift := uint8(rand.Intn(100))
 
 		for y := yStart; y < yStart+bandHeight && y < bounds.Max.Y; y++ {
+			rowOffset := dst.PixOffset(bounds.Min.X, y)
 			for x := bounds.Min.X; x < bounds.Max.X; x++ {
-				r, g, b, a := dst.At(x, y).RGBA()
-				dst.Set(x, y, color.NRGBA{
-					R: uint8(r>>8) ^ colorShift,
-					G: uint8(g>>8) ^ colorShift,
-					B: uint8(b>>8) ^ colorShift,
-					A: uint8(a >> 8),
-				})
+				dst.Pix[rowOffset] ^= colorShift
+				dst.Pix[rowOffset+1] ^= colorShift
+				dst.Pix[rowOffset+2] ^= colorShift
+				rowOffset += 4
 			}
 		}
 	}

@@ -51,20 +51,22 @@ func edgeDetect(img image.Image, x, y int) float64 {
 
 // PopPink applies a vibrant "pop pink" filter effect to the given image.
 // The effect consists of two main components:
-//   1. A neon blue color boost applied to the image's base colors, increasing
-//      the intensity of blue and red channels for a vivid look.
-//   2. A neon red halo effect around detected edges, giving the image a glowing,
-//      stylized outline. The halo is created by edge detection, thresholding,
-//      and dilation to expand the glow around edges.
+//  1. A neon blue color boost applied to the image's base colors, increasing
+//     the intensity of blue and red channels for a vivid look.
+//  2. A neon red halo effect around detected edges, giving the image a glowing,
+//     stylized outline. The halo is created by edge detection, thresholding,
+//     and dilation to expand the glow around edges.
 //
 // The resulting image combines the enhanced base colors with the glowing edge
 // halo, producing a visually striking, pop-art inspired effect.
 //
 // Parameters:
-//   img image.Image - The source image to apply the filter to.
+//
+//	img image.Image - The source image to apply the filter to.
 //
 // Returns:
-//   image.Image - The filtered image with the pop pink effect applied.
+//
+//	image.Image - The filtered image with the pop pink effect applied.
 func PopPink(img image.Image) image.Image {
 	bounds := img.Bounds()
 	dst := image.NewRGBA(bounds)
@@ -125,7 +127,7 @@ func PopPink(img image.Image) image.Image {
 			b := clamp8(int(float64(origB>>8)*1.8) + int(neonBlue.B/2))
 
 			hr, hg, hb, ha := haloDilated.At(x, y).RGBA()
-			haF := float64(ha >> 8) / 255.0
+			haF := float64(ha>>8) / 255.0
 
 			finalR := uint8(float64(r)*(1-haF) + float64(hr>>8)*haF)
 			finalG := uint8(float64(g)*(1-haF) + float64(hg>>8)*haF)

@@ -1,19 +1,21 @@
 package cache
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"math/rand"
 	"net/http"
 	"os"
 	"path/filepath"
+	"sort"
 	"sync"
 
 	"github.com/fsnotify/fsnotify"
 )
 
 type FileMeta struct {
-	Size       int64 
+	Size       int64
 	Readable   string
 	MimeType   string
 	ModifiedAt int64
@@ -22,6 +24,7 @@ type FileMeta struct {
 type ImageCache struct {
 	sync.RWMutex
 	files   map[string][]string
+	paths   map[string]map[string]string
 	metas   map[string]map[string]FileMeta
 	root    string
 	watcher *fsnotify.Watcher
@@ -33,6 +36,7 @@ type ImageCache struct {
 func New(assetsRoot string) (*ImageCache, error) {
 	cache := &ImageCache{
 		files: make(map[string][]string),
+		paths: make(map[string]map[string]string),
 		metas: make(map[string]map[string]FileMeta),
 		root:  assetsRoot,
 	}
@@ -55,9 +59,12 @@ func (c *ImageCache) loadAllCategories() error {
 		return err
 	}
 
+	var loadErrors []error
 	for _, entry := range entries {
 		if entry.IsDir() {
-			_ = c.LoadCategory(entry.Name())
+			if err := c.LoadCategory(entry.Name()); err != nil {
+				loadErrors = append(loadErrors, fmt.Errorf("%s: %w", entry.Name(), err))
+			}
 		}
 	}
 
@@ -65,6 +72,10 @@ func (c *ImageCache) loadAllCategories() error {
 	if err := c.StartWatching(); err != nil {
 		log.Printf("Error starting file watcher: %v", err)
 		return err
+	}
+
+	if len(loadErrors) > 0 {
+		return errors.Join(loadErrors...)
 	}
 
 	return nil
@@ -86,7 +97,8 @@ func (c *ImageCache) LoadCategory(category string) error {
 	}
 
 	var paths []string
-	metaByFile := make(map[string]FileMeta)
+	pathByFile := make(map[string]string, len(entries))
+	metaByFile := make(map[string]FileMeta, len(entries))
 
 	for _, entry := range entries {
 		if entry.IsDir() {
@@ -97,6 +109,7 @@ func (c *ImageCache) LoadCategory(category string) error {
 		paths = append(paths, name)
 
 		fullPath := filepath.Join(folder, name)
+		pathByFile[name] = fullPath
 		info, err := os.Stat(fullPath)
 		if err != nil {
 			continue
@@ -104,10 +117,10 @@ func (c *ImageCache) LoadCategory(category string) error {
 
 		mime := "application/octet-stream"
 		if f, err := os.Open(fullPath); err == nil {
-			defer f.Close()
 			buf := make([]byte, 512)
 			_, _ = f.Read(buf)
 			mime = http.DetectContentType(buf)
+			_ = f.Close()
 		}
 
 		metaByFile[name] = FileMeta{
@@ -119,6 +132,7 @@ func (c *ImageCache) LoadCategory(category string) error {
 	}
 
 	c.files[category] = paths
+	c.paths[category] = pathByFile
 	c.metas[category] = metaByFile
 
 	log.Printf("Loaded %d files for category '%s'", len(paths), category)
@@ -152,7 +166,20 @@ func (c *ImageCache) GetFiles(category string) []string {
 		return nil
 	}
 
-	return paths
+	return append([]string(nil), paths...)
+}
+
+// Categories returns the currently cached category names in stable order.
+func (c *ImageCache) Categories() []string {
+	c.RLock()
+	defer c.RUnlock()
+
+	categories := make([]string, 0, len(c.files))
+	for category := range c.files {
+		categories = append(categories, category)
+	}
+	sort.Strings(categories)
+	return categories
 }
 
 // GetImagePath returns the full file path of an image with the specified name within the given category.
@@ -162,19 +189,13 @@ func (c *ImageCache) GetImagePath(category, name string) (string, bool) {
 	c.RLock()
 	defer c.RUnlock()
 
-	files, ok := c.files[category]
+	pathByFile, ok := c.paths[category]
 	if !ok {
 		return "", false
 	}
 
-	for _, f := range files {
-		if f == name {
-			fullPath := filepath.Join(c.root, category, f)
-			return fullPath, true
-		}
-	}
-
-	return "", false
+	fullPath, exists := pathByFile[name]
+	return fullPath, exists
 }
 
 // GetImageMeta retrieves the metadata (FileMeta) for an image specified by its category and name.
@@ -195,7 +216,7 @@ func (c *ImageCache) GetImageMeta(category, name string) (FileMeta, bool) {
 // humanFileSize converts a file size given in bytes to a human-readable string
 // using binary (base-1024) units. For example, 1536 bytes will be formatted as "1.50 KB".
 // The function supports units up to exabytes (EB).
-// 
+//
 // Parameters:
 //   - size: the file size in bytes.
 //
@@ -212,4 +233,17 @@ func humanFileSize(size int64) string {
 		exp++
 	}
 	return fmt.Sprintf("%.2f %cB", float64(size)/float64(div), "KMGTPE"[exp])
+}
+
+func (c *ImageCache) Close() error {
+	c.Lock()
+	defer c.Unlock()
+
+	if c.watcher == nil {
+		return nil
+	}
+
+	err := c.watcher.Close()
+	c.watcher = nil
+	return err
 }

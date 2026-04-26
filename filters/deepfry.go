@@ -2,11 +2,9 @@ package filters
 
 import (
 	"image"
-	"image/color"
 	_ "image/gif"
 	_ "image/jpeg"
 	_ "image/png"
-	"math"
 
 	_ "github.com/chai2010/webp"
 )
@@ -17,27 +15,24 @@ import (
 // visually exaggerated and stylized image. The function returns a new image with
 // the applied effect, preserving the original image's dimensions.
 func Deepfry(img image.Image) image.Image {
-	bounds := img.Bounds()
+	src := ensureRGBA(img)
+	bounds := src.Bounds()
 	dst := image.NewRGBA(bounds)
 
 	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
+		srcOffset := src.PixOffset(bounds.Min.X, y)
+		dstOffset := dst.PixOffset(bounds.Min.X, y)
 		for x := bounds.Min.X; x < bounds.Max.X; x++ {
-			r, g, b, a := img.At(x, y).RGBA()
+			r := int(src.Pix[srcOffset])
+			g := int(src.Pix[srcOffset+1])
+			b := int(src.Pix[srcOffset+2])
 
-			r8 := float64(r >> 8)
-			g8 := float64(g >> 8)
-			b8 := float64(b >> 8)
-
-			r8 = math.Min(255, r8*1.8+50)
-			g8 = math.Min(255, g8*1.4)
-			b8 = math.Min(255, b8*0.8)
-
-			dst.Set(x, y, color.NRGBA{
-				R: uint8(r8),
-				G: uint8(g8),
-				B: uint8(b8),
-				A: uint8(a >> 8),
-			})
+			dst.Pix[dstOffset] = clamp8((r*18)/10 + 50)
+			dst.Pix[dstOffset+1] = clamp8((g * 14) / 10)
+			dst.Pix[dstOffset+2] = clamp8((b * 8) / 10)
+			dst.Pix[dstOffset+3] = src.Pix[srcOffset+3]
+			srcOffset += 4
+			dstOffset += 4
 		}
 	}
 

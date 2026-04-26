@@ -17,10 +17,12 @@ import (
 // is preserved from the original image.
 //
 // Parameters:
-//   img image.Image - The source image to apply the sunset filter to.
+//
+//	img image.Image - The source image to apply the sunset filter to.
 //
 // Returns:
-//   image.Image - A new image with the sunset filter applied.
+//
+//	image.Image - A new image with the sunset filter applied.
 func Sunset(img image.Image) image.Image {
 	bounds := img.Bounds()
 	dst := image.NewRGBA(bounds)
@@ -41,9 +43,9 @@ func Sunset(img image.Image) image.Image {
 			case lum >= 0.92:
 				nr, ng, nb = 255, 255, 255
 			case lum >= 0.7:
-				nr, ng, nb = 255,140,90
+				nr, ng, nb = 255, 140, 90
 			case lum >= 0.45:
-				nr, ng, nb = 120,60,80
+				nr, ng, nb = 120, 60, 80
 			case lum >= 0.15:
 				nr, ng, nb = 35, 39, 42
 			default:

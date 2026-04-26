@@ -16,6 +16,7 @@ import (
 //   - Bright pixels become mint green.
 //   - Mid-tone pixels become teal.
 //   - Darker pixels become dark gray.
+//
 // The alpha channel is preserved from the original image.
 func Mint(img image.Image) image.Image {
 	bounds := img.Bounds()
@@ -37,9 +38,9 @@ func Mint(img image.Image) image.Image {
 			case lum >= 0.92:
 				nr, ng, nb = 255, 255, 255
 			case lum >= 0.7:
-				nr, ng, nb = 100,255,200
+				nr, ng, nb = 100, 255, 200
 			case lum >= 0.45:
-				nr, ng, nb = 30,120,100
+				nr, ng, nb = 30, 120, 100
 			case lum >= 0.15:
 				nr, ng, nb = 35, 39, 42
 			default:

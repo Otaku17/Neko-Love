@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+	"neko-love/config"
 	"neko-love/routes"
 	"neko-love/services/cache"
 
@@ -11,18 +13,17 @@ import (
 // starts watching for asset changes, sets up the application routes, and begins
 // listening for incoming HTTP requests on port 3030.
 func main() {
+	cfg := config.Load()
 	app := fiber.New()
 
-	cacheAssets, err := cache.New("./assets")
+	cacheAssets, err := cache.New(cfg.AssetsDir)
 	if err != nil {
-		panic("Failed to initialize image cache: " + err.Error())
+		log.Fatalf("failed to initialize image cache: %v", err)
 	}
+	defer cacheAssets.Close()
 
-	app.Use(func(c *fiber.Ctx) error {
-		c.Locals("cacheAssets", cacheAssets)
-		return c.Next()
-	})
-
-	routes.SetupRoutes(app)
-	app.Listen(":3030")
+	routes.SetupRoutes(app, cfg, cacheAssets)
+	if err := app.Listen(":" + cfg.Port); err != nil {
+		log.Fatalf("failed to start server: %v", err)
+	}
 }

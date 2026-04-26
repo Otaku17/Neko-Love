@@ -18,10 +18,12 @@ import (
 // suitable for creating an "anime-style" outline effect.
 //
 // Parameters:
-//   img image.Image - The source image to process.
+//
+//	img image.Image - The source image to process.
 //
 // Returns:
-//   image.Image - A new image with detected outlines.
+//
+//	image.Image - A new image with detected outlines.
 func AnimeOutline(img image.Image) image.Image {
 	bounds := img.Bounds()
 	dst := image.NewRGBA(bounds)

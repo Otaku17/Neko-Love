@@ -27,10 +27,18 @@ func (c *ImageCache) StartWatching() error {
 		return err
 	}
 
+	if err := watcher.Add(c.root); err != nil {
+		_ = watcher.Close()
+		return err
+	}
+
 	for _, entry := range entries {
 		if entry.IsDir() {
 			categoryPath := filepath.Join(c.root, entry.Name())
-			_ = watcher.Add(categoryPath)
+			if err := watcher.Add(categoryPath); err != nil {
+				_ = watcher.Close()
+				return err
+			}
 		}
 	}
 
@@ -50,31 +58,57 @@ func (c *ImageCache) watchLoop() {
 			if !ok {
 				return
 			}
-
-			relPath, err := filepath.Rel(c.root, event.Name)
-			if err != nil {
-				continue
-			}
-			parts := strings.Split(relPath, string(os.PathSeparator))
-			if len(parts) < 1 {
-				continue
-			}
-			category := parts[0]
-			fullCategoryPath := filepath.Join(c.root, category)
-
-			if event.Op&(fsnotify.Create|fsnotify.Remove|fsnotify.Rename) != 0 {
-				log.Printf("Cache watcher detected change in category '%s': %s", category, event.Name)
-				_ = c.LoadCategory(category)
-
-				if _, err := os.Stat(fullCategoryPath); os.IsNotExist(err) {
-					_ = c.watcher.Add(fullCategoryPath)
-				}
-			}
+			c.handleWatchEvent(event)
 		case err, ok := <-c.watcher.Errors:
 			if !ok {
 				return
 			}
 			log.Printf("Cache watcher error: %v", err)
+		}
+	}
+}
+
+func (c *ImageCache) handleWatchEvent(event fsnotify.Event) {
+	if event.Op&(fsnotify.Create|fsnotify.Remove|fsnotify.Rename|fsnotify.Write) == 0 {
+		return
+	}
+
+	relPath, err := filepath.Rel(c.root, event.Name)
+	if err != nil || relPath == "." {
+		return
+	}
+
+	parts := strings.Split(relPath, string(os.PathSeparator))
+	if len(parts) < 1 || parts[0] == "" {
+		return
+	}
+
+	category := parts[0]
+	fullCategoryPath := filepath.Join(c.root, category)
+
+	info, statErr := os.Stat(fullCategoryPath)
+	switch {
+	case statErr == nil && info.IsDir():
+		if event.Op&fsnotify.Create != 0 && len(parts) == 1 {
+			if err := c.watcher.Add(fullCategoryPath); err != nil {
+				log.Printf("failed to watch new category '%s': %v", category, err)
+			}
+		}
+		if err := c.LoadCategory(category); err != nil {
+			log.Printf("failed to reload category '%s': %v", category, err)
+			return
+		}
+		log.Printf("Cache watcher reloaded category '%s' after %s", category, event.Name)
+	case os.IsNotExist(statErr):
+		c.Lock()
+		delete(c.files, category)
+		delete(c.paths, category)
+		delete(c.metas, category)
+		c.Unlock()
+		log.Printf("Cache watcher removed category '%s'", category)
+	default:
+		if statErr != nil {
+			log.Printf("cache watcher stat error for '%s': %v", category, statErr)
 		}
 	}
 }

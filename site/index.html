@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Neko-Love | Anime Image API</title>
+  <meta name="description" content="Neko-Love is back with a cleaner anime image API, filter endpoints, and modern documentation ready for GitHub Pages.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f7efe4;
+      --bg-deep: #ead9c0;
+      --paper: rgba(255, 251, 246, 0.92);
+      --paper-strong: rgba(255, 249, 241, 0.98);
+      --ink: #1e1814;
+      --muted: #6d665f;
+      --line: rgba(31, 23, 15, 0.12);
+      --accent: #df6d3e;
+      --accent-deep: #b64a20;
+      --teal: #1f5958;
+      --shadow: 0 24px 62px rgba(62, 46, 27, 0.15);
+      --shadow-soft: 0 14px 36px rgba(62, 46, 27, 0.09);
+      --sans: "Space Grotesk", "Segoe UI", sans-serif;
+      --mono: "IBM Plex Mono", Consolas, monospace;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: var(--sans);
+      background:
+        radial-gradient(circle at top left, rgba(223,109,62,0.22), transparent 24%),
+        radial-gradient(circle at 92% 8%, rgba(31,89,88,0.18), transparent 20%),
+        linear-gradient(180deg, var(--bg) 0%, var(--bg-deep) 100%);
+    }
+    a { color: inherit; }
+    .shell {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 26px 18px 56px;
+    }
+    .hero {
+      overflow: hidden;
+      position: relative;
+      border-radius: 34px;
+      border: 1px solid var(--line);
+      background: linear-gradient(145deg, rgba(255,251,246,0.98), rgba(247,237,223,0.92));
+      box-shadow: var(--shadow);
+      padding: 34px;
+    }
+    .hero::after {
+      content: "";
+      position: absolute;
+      right: -40px;
+      bottom: -80px;
+      width: 280px;
+      height: 280px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(223,109,62,0.22), transparent 48%),
+        radial-gradient(circle at 70% 70%, rgba(31,89,88,0.2), transparent 42%);
+      pointer-events: none;
+    }
+    .eyebrow {
+      margin: 0 0 10px;
+      color: var(--teal);
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(3rem, 8vw, 6.2rem);
+      line-height: 0.88;
+      letter-spacing: -0.08em;
+      max-width: 8ch;
+    }
+    .lead {
+      margin: 18px 0 0;
+      max-width: 62ch;
+      color: var(--muted);
+      font-size: 1.08rem;
+      line-height: 1.7;
+    }
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 24px;
+    }
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 0 18px;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 700;
+      border: 1px solid transparent;
+      transition: transform 140ms ease, box-shadow 140ms ease;
+    }
+    .button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 24px rgba(72, 50, 30, 0.14);
+    }
+    .button.primary {
+      color: #fff;
+      background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+    }
+    .button.secondary {
+      border-color: var(--line);
+      background: rgba(255,255,255,0.7);
+    }
+    .hero-grid,
+    .cards,
+    .examples {
+      display: grid;
+      gap: 18px;
+    }
+    .hero-grid {
+      margin-top: 28px;
+    }
+    @media (min-width: 1024px) {
+      .hero-grid {
+        grid-template-columns: minmax(0, 1.2fr) minmax(340px, 0.8fr);
+      }
+      .cards {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+      .examples {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+    .panel,
+    .card {
+      border-radius: 26px;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      box-shadow: var(--shadow-soft);
+    }
+    .panel {
+      padding: 20px;
+    }
+    .panel h2,
+    .card h3,
+    .section h2 {
+      margin: 0 0 10px;
+    }
+    .panel p,
+    .card p,
+    .section p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+    .stats {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      margin-top: 18px;
+    }
+    .stat {
+      padding: 14px;
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.72);
+    }
+    .stat strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 1.35rem;
+    }
+    .section {
+      margin-top: 22px;
+      padding: 24px;
+      border-radius: 30px;
+      border: 1px solid var(--line);
+      background: var(--paper-strong);
+      box-shadow: var(--shadow);
+    }
+    .cards .card,
+    .examples .card {
+      padding: 20px;
+    }
+    .kicker {
+      color: var(--teal);
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 12px;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+    pre {
+      margin: 0;
+      overflow: auto;
+      border-radius: 18px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.74);
+      color: #1f2933;
+      font-family: var(--mono);
+      font-size: 0.84rem;
+      line-height: 1.55;
+    }
+    .callout {
+      margin-top: 18px;
+      padding: 16px 18px;
+      border-radius: 20px;
+      border: 1px solid rgba(31,89,88,0.14);
+      background: rgba(31,89,88,0.08);
+      color: #24403f;
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="hero">
+      <p class="eyebrow">Neko-Love Is Back</p>
+      <h1>Anime API, now with a real front page.</h1>
+      <p class="lead">Serve random anime images, direct asset URLs, and filter endpoints from Go, while publishing a proper landing page and interactive docs from GitHub Pages.</p>
+
+      <div class="actions">
+        <a class="button primary" href="./docs/">Open API Docs</a>
+        <a class="button secondary" href="./docs/redoc.html">Open Redoc View</a>
+        <a class="button secondary" href="./openapi.json">View OpenAPI JSON</a>
+      </div>
+
+      <div class="hero-grid">
+        <div class="panel">
+          <h2>Built for a cleaner comeback</h2>
+          <p>Neko-Love now has a setup that feels ready to ship: local assets, filter routes, OpenAPI 3.1 docs, a static front page, and a documentation experience that looks closer to a real product than a raw developer tool.</p>
+          <div class="stats">
+            <div class="stat">
+              <strong>OpenAPI 3.1</strong>
+              <span>Ready for docs tooling and SDK generation</span>
+            </div>
+            <div class="stat">
+              <strong>18 filters</strong>
+              <span>Including animated GIF support</span>
+            </div>
+            <div class="stat">
+              <strong>Pages-ready</strong>
+              <span>Static site separated from the Go API</span>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <h2>Deployment split</h2>
+          <p>Host this static folder on GitHub Pages and keep the Go API on a VPS, Fly.io, Render, Railway, or your own server. That way you get a clean public site without trying to force dynamic Go code onto static hosting.</p>
+          <div class="callout">
+            Set <code>CORS_ALLOW_ORIGINS</code> on the API to your Pages domain if you want live “Try it out” requests from the static docs.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <p class="kicker">Highlights</p>
+      <h2>What visitors will notice first</h2>
+      <div class="cards">
+        <article class="card">
+          <h3>Clean docs</h3>
+          <p>Scalar for the polished interactive reference, Redoc for the classic API handbook feel.</p>
+        </article>
+        <article class="card">
+          <h3>Simple integration</h3>
+          <p>Metadata routes, direct image routes, and filter endpoints are easy to test from a browser or wrapper library.</p>
+        </article>
+        <article class="card">
+          <h3>Easy branding</h3>
+          <p>This site is just HTML, CSS, and JS, so you can push the identity harder without touching the Go runtime.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <p class="kicker">Examples</p>
+      <h2>Quick usage snippets</h2>
+      <div class="examples">
+        <article class="card">
+          <h3>cURL</h3>
+          <pre><code>curl "https://api.neko-love.com/api/v4/neko"
+
+curl "https://api.neko-love.com/api/v4/filters/pixelate?image=https://example.com/cat.png&pixel_size=12"</code></pre>
+        </article>
+        <article class="card">
+          <h3>JavaScript</h3>
+          <pre><code>const meta = await fetch("https://api.neko-love.com/api/v4/neko")
+  .then((res) => res.json())
+
+const imgUrl = new URL("https://api.neko-love.com/api/v4/filters/pixelate")
+imgUrl.searchParams.set("image", "https://example.com/cat.png")
+imgUrl.searchParams.set("pixel_size", "12")</code></pre>
+        </article>
+        <article class="card">
+          <h3>Python</h3>
+          <pre><code>import requests
+
+meta = requests.get("https://api.neko-love.com/api/v4/neko").json()
+
+img = requests.get(
+    "https://api.neko-love.com/api/v4/filters/pixelate",
+    params={"image": "https://example.com/cat.png", "pixel_size": 12},
+)</code></pre>
+        </article>
+      </div>
+    </section>
+  </div>
+</body>
+</html>
+

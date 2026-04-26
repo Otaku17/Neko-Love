@@ -15,6 +15,16 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+type FilterOptions struct {
+	PixelSize int
+}
+
+func DefaultFilterOptions() FilterOptions {
+	return FilterOptions{
+		PixelSize: 6,
+	}
+}
+
 // ProcessGIF applies a specified filter to each frame of a given GIF image.
 // It processes each frame by converting it to RGBA, applying the filter, and then
 // converting it back to a paletted image while preserving transparency. The function
@@ -27,10 +37,13 @@ import (
 // Returns:
 //   - A pointer to a new gif.GIF object with the filter applied to each frame.
 //   - An error if the input GIF has no frames or if processing fails.
-func ProcessGIF(filterName string, g *gif.GIF) (*gif.GIF, error) {
+func ProcessGIF(filterName string, g *gif.GIF, options FilterOptions) (*gif.GIF, error) {
 	if len(g.Image) == 0 {
 		return nil, errors.New("GIF has no frames")
 	}
+
+	fullBounds := image.Rect(0, 0, g.Config.Width, g.Config.Height)
+	canvas := image.NewRGBA(fullBounds)
 
 	result := &gif.GIF{
 		LoopCount: g.LoopCount,
@@ -40,16 +53,11 @@ func ProcessGIF(filterName string, g *gif.GIF) (*gif.GIF, error) {
 	}
 
 	for i, frame := range g.Image {
-		bounds := g.Image[0].Bounds()
-		rgba := image.NewRGBA(bounds)
+		canvasBefore := cloneRGBA(canvas)
+		draw.Draw(canvas, frame.Bounds(), frame, frame.Bounds().Min, draw.Over)
 
-		draw.Draw(rgba, frame.Bounds(), frame, frame.Bounds().Min, draw.Over)
-
-		filtered := ApplyFilter(filterName, rgba)
-
+		filtered := ApplyFilterWithOptions(filterName, canvas, options)
 		palettedFrame := rgbaToPalettedWithTransparency(filtered)
-
-		palettedFrame.Rect = bounds
 
 		result.Image = append(result.Image, palettedFrame)
 
@@ -62,6 +70,18 @@ func ProcessGIF(filterName string, g *gif.GIF) (*gif.GIF, error) {
 			result.Disposal = append(result.Disposal, g.Disposal[i])
 		} else {
 			result.Disposal = append(result.Disposal, gif.DisposalNone)
+		}
+
+		disposal := byte(gif.DisposalNone)
+		if i < len(g.Disposal) {
+			disposal = g.Disposal[i]
+		}
+
+		switch disposal {
+		case gif.DisposalBackground:
+			clearRect(canvas, frame.Bounds())
+		case gif.DisposalPrevious:
+			draw.Draw(canvas, canvas.Bounds(), canvasBefore, canvasBefore.Bounds().Min, draw.Src)
 		}
 	}
 
@@ -79,8 +99,12 @@ func ProcessGIF(filterName string, g *gif.GIF) (*gif.GIF, error) {
 // Returns:
 //   - image.Image: the filtered image.
 func ApplyFilter(filter string, img image.Image) image.Image {
-	rgba := image.NewRGBA(img.Bounds())
-	draw.Draw(rgba, rgba.Bounds(), img, img.Bounds().Min, draw.Src)
+	return ApplyFilterWithOptions(filter, img, DefaultFilterOptions())
+}
+
+// ApplyFilterWithOptions applies the selected filter using the provided options.
+func ApplyFilterWithOptions(filter string, img image.Image, options FilterOptions) image.Image {
+	rgba := toRGBA(img)
 
 	switch filter {
 	case "blurple":
@@ -96,7 +120,7 @@ func ApplyFilter(filter string, img image.Image) image.Image {
 	case "posterize":
 		return filters.Posterize(rgba)
 	case "pixelate":
-		return filters.Pixelate(rgba)
+		return filters.PixelateWithBlockSize(rgba, options.PixelSize)
 	case "vaporwave":
 		return filters.Vaporwave(rgba)
 	case "anime_outline":
@@ -121,6 +145,36 @@ func ApplyFilter(filter string, img image.Image) image.Image {
 		return filters.HoloFuturistic(rgba)
 	default:
 		return rgba
+	}
+}
+
+func toRGBA(img image.Image) *image.RGBA {
+	if rgba, ok := img.(*image.RGBA); ok {
+		return rgba
+	}
+
+	dst := image.NewRGBA(img.Bounds())
+	draw.Draw(dst, dst.Bounds(), img, img.Bounds().Min, draw.Src)
+	return dst
+}
+
+func cloneRGBA(src *image.RGBA) *image.RGBA {
+	dst := image.NewRGBA(src.Bounds())
+	copy(dst.Pix, src.Pix)
+	return dst
+}
+
+func clearRect(img *image.RGBA, rect image.Rectangle) {
+	rect = rect.Intersect(img.Bounds())
+	for y := rect.Min.Y; y < rect.Max.Y; y++ {
+		offset := img.PixOffset(rect.Min.X, y)
+		for x := rect.Min.X; x < rect.Max.X; x++ {
+			img.Pix[offset] = 0
+			img.Pix[offset+1] = 0
+			img.Pix[offset+2] = 0
+			img.Pix[offset+3] = 0
+			offset += 4
+		}
 	}
 }
 

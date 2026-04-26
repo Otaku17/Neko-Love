@@ -16,10 +16,12 @@ import (
 // The function returns a new image.Image with the filter applied.
 //
 // Parameters:
-//   img image.Image - The source image to apply the vaporwave filter to.
+//
+//	img image.Image - The source image to apply the vaporwave filter to.
 //
 // Returns:
-//   image.Image - A new image with the vaporwave filter effect applied.
+//
+//	image.Image - A new image with the vaporwave filter effect applied.
 func Vaporwave(img image.Image) image.Image {
 	bounds := img.Bounds()
 	dst := image.NewRGBA(bounds)

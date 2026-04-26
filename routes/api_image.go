@@ -2,10 +2,16 @@ package routes
 
 import (
 	"fmt"
+	"net/http"
+	"strconv"
+	"time"
+
 	"neko-love/services/cache"
 
 	"github.com/gofiber/fiber/v2"
 )
+
+const httpTimeFormat = "Mon, 02 Jan 2006 15:04:05 GMT"
 
 type ImageHandler struct {
 	cache *cache.ImageCache
@@ -29,36 +35,19 @@ func (h *ImageHandler) GetRandomImage(c *fiber.Ctx) error {
 		return fiber.ErrNotFound
 	}
 
-	image, ok := h.cache.GetImagePath(category, name)
+	imagePath, ok := h.cache.GetImagePath(category, name)
 	if !ok {
 		return fiber.ErrNotFound
 	}
 
 	c.Locals("noCache", true)
 	c.Set("Content-Disposition", fmt.Sprintf(`inline; filename="%s"`, name))
-	return c.SendFile(image)
+	_ = setImageHeaders(c, category, name, h.cache)
+	return c.SendFile(imagePath)
 }
 
 // GetRandomImageMeta handles the HTTP request to retrieve metadata for a random image
-// within a specified category. It extracts the category from the route parameters,
-// fetches a random image name from the cache, and retrieves its metadata. If successful,
-// it returns a JSON response containing the image name, category, API path, human-readable
-// size, size in bytes, last modified timestamp, and MIME type. If the category or image
-// is not found, it responds with a 404 Not Found error.
-//
-// Route Params:
-//   - category: string representing the image category.
-//
-// Response JSON:
-//   - name:        string, image file name
-//   - category:    string, image category
-//   - path:        string, API path to the image
-//   - size:        string, human-readable file size
-//   - size_bytes:  int64, file size in bytes
-//   - modified_at: time.Time, last modified timestamp
-//   - mime_type:   string, MIME type of the image
-//
-// Returns 404 if the category or image is not found.
+// within a specified category.
 func (h *ImageHandler) GetRandomImageMeta(c *fiber.Ctx) error {
 	category := c.Params("category")
 
@@ -96,27 +85,50 @@ func (h *ImageHandler) ServeImage(c *fiber.Ctx) error {
 		return fiber.ErrNotFound
 	}
 
+	if setImageHeaders(c, category, name, h.cache) {
+		return c.SendStatus(fiber.StatusNotModified)
+	}
+
 	return c.SendFile(path)
 }
 
 // RegisterImageRoutes registers image-related API routes to the provided Fiber router.
-// It sets up middleware to inject an ImageHandler into the request context using a cached image asset store.
-// The following endpoints are registered:
-//   - GET /:category: Returns random image metadata for the specified category.
-//   - GET /images/:category/:name: Serves the image file for the given category and image name.
-func RegisterImageRoutes(router fiber.Router) {
-	router.Use(func(c *fiber.Ctx) error {
-		c.Locals("handler", NewImageHandler(c.Locals("cacheAssets").(*cache.ImageCache)))
-		return c.Next()
-	})
+func RegisterImageRoutes(router fiber.Router, imageCache *cache.ImageCache) {
+	handler := NewImageHandler(imageCache)
 
-	router.Get("/:category", func(c *fiber.Ctx) error {
-		handler := c.Locals("handler").(*ImageHandler)
-		return handler.GetRandomImageMeta(c)
-	})
+	router.Get("/:category", handler.GetRandomImageMeta)
+	router.Get("/images/:category/:name", handler.ServeImage)
+}
 
-	router.Get("/images/:category/:name", func(c *fiber.Ctx) error {
-		handler := c.Locals("handler").(*ImageHandler)
-		return handler.ServeImage(c)
-	})
+func setImageHeaders(c *fiber.Ctx, category, name string, imageCache *cache.ImageCache) bool {
+	meta, ok := imageCache.GetImageMeta(category, name)
+	if !ok {
+		return false
+	}
+
+	etag := buildImageETag(meta)
+	lastModified := time.Unix(meta.ModifiedAt, 0).UTC().Format(httpTimeFormat)
+
+	c.Set(fiber.HeaderCacheControl, "public, max-age=31536000, immutable")
+	c.Set(fiber.HeaderETag, etag)
+	c.Set(fiber.HeaderLastModified, lastModified)
+	if meta.MimeType != "" {
+		c.Set(fiber.HeaderContentType, meta.MimeType)
+	}
+
+	if match := c.Get(fiber.HeaderIfNoneMatch); match != "" && match == etag {
+		return true
+	}
+
+	if modifiedSince := c.Get(fiber.HeaderIfModifiedSince); modifiedSince != "" {
+		if t, err := time.Parse(http.TimeFormat, modifiedSince); err == nil && !t.Before(time.Unix(meta.ModifiedAt, 0).UTC()) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func buildImageETag(meta cache.FileMeta) string {
+	return `W/"` + strconv.FormatInt(meta.ModifiedAt, 10) + `-` + strconv.FormatInt(meta.Size, 10) + `"`
 }

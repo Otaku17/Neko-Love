@@ -16,10 +16,12 @@ import (
 // The output image preserves the original alpha channel.
 //
 // Parameters:
-//   img image.Image - The source image to be filtered.
+//
+//	img image.Image - The source image to be filtered.
 //
 // Returns:
-//   image.Image - A new image with the crimson filter applied.
+//
+//	image.Image - A new image with the crimson filter applied.
 func Crimson(img image.Image) image.Image {
 	bounds := img.Bounds()
 	dst := image.NewRGBA(bounds)

@@ -2,7 +2,6 @@ package filters
 
 import (
 	"image"
-	"image/color"
 	_ "image/gif"
 	_ "image/jpeg"
 	_ "image/png"
@@ -19,36 +18,49 @@ import (
 // Returns:
 //   - image.Image: A new image with the pixelation effect applied.
 func Pixelate(img image.Image) image.Image {
-	bounds := img.Bounds()
+	return PixelateWithBlockSize(img, 6)
+}
+
+// PixelateWithBlockSize applies the pixelation effect using a configurable block size.
+// A larger block size produces a stronger pixelation effect.
+func PixelateWithBlockSize(img image.Image, blockSize int) image.Image {
+	src := ensureRGBA(img)
+	bounds := src.Bounds()
 	dst := image.NewRGBA(bounds)
-	blockSize := 6
+	if blockSize < 2 {
+		blockSize = 2
+	}
 
 	for y := bounds.Min.Y; y < bounds.Max.Y; y += blockSize {
 		for x := bounds.Min.X; x < bounds.Max.X; x += blockSize {
-			var rTotal, gTotal, bTotal, aTotal uint32
-			var count uint32
+			var rTotal, gTotal, bTotal, aTotal int
+			count := 0
 
 			for yy := y; yy < y+blockSize && yy < bounds.Max.Y; yy++ {
+				rowOffset := src.PixOffset(x, yy)
 				for xx := x; xx < x+blockSize && xx < bounds.Max.X; xx++ {
-					r, g, b, a := img.At(xx, yy).RGBA()
-					rTotal += r
-					gTotal += g
-					bTotal += b
-					aTotal += a
+					rTotal += int(src.Pix[rowOffset])
+					gTotal += int(src.Pix[rowOffset+1])
+					bTotal += int(src.Pix[rowOffset+2])
+					aTotal += int(src.Pix[rowOffset+3])
 					count++
+					rowOffset += 4
 				}
 			}
 
-			avgColor := color.NRGBA{
-				R: uint8((rTotal / count) >> 8),
-				G: uint8((gTotal / count) >> 8),
-				B: uint8((bTotal / count) >> 8),
-				A: uint8((aTotal / count) >> 8),
-			}
+			rAvg := uint8(rTotal / count)
+			gAvg := uint8(gTotal / count)
+			bAvg := uint8(bTotal / count)
+			aAvg := uint8(aTotal / count)
 
 			for yy := y; yy < y+blockSize && yy < bounds.Max.Y; yy++ {
+				rowOffset := dst.PixOffset(x, yy)
 				for xx := x; xx < x+blockSize && xx < bounds.Max.X; xx++ {
-					dst.Set(xx, yy, avgColor)
+					dst.Pix[rowOffset] = rAvg
+					dst.Pix[rowOffset+1] = gAvg
+					dst.Pix[rowOffset+2] = bAvg
+					dst.Pix[rowOffset+3] = aAvg
+					rowOffset += 4
 				}
 			}
 		}
